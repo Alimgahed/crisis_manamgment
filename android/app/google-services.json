@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "298280370718",
+    "project_id": "crisis-management-5626d",
+    "storage_bucket": "crisis-management-5626d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:298280370718:android:4c1bc58728775b433ae40f",
+        "android_client_info": {
+          "package_name": "com.example.crisis_management"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcmT-U5RabqDwhM1lUqR73DeAonzh69Ek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
