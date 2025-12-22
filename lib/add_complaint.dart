@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AddComplaintScreen extends StatefulWidget {
-  const AddComplaintScreen({super.key});
+class AddIncidentScreen extends StatefulWidget {
+  const AddIncidentScreen({super.key});
 
   @override
-  State<AddComplaintScreen> createState() => _AddComplaintScreenState();
+  State<AddIncidentScreen> createState() => _AddIncidentScreenState();
 }
 
-class _AddComplaintScreenState extends State<AddComplaintScreen> {
+class _AddIncidentScreenState extends State<AddIncidentScreen> {
   final _formKey = GlobalKey<FormState>();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  final TextEditingController _typeController = TextEditingController();
-  final TextEditingController _areaController = TextEditingController();
-  final TextEditingController _latController = TextEditingController();
-  final TextEditingController _lngController = TextEditingController();
+  final _typeController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _latController = TextEditingController();
+  final _lngController = TextEditingController();
 
+  String _status = 'Pending';
+  String _severity = 'medium';
   bool _loading = false;
 
   Future<void> _submit() async {
@@ -25,52 +27,26 @@ class _AddComplaintScreenState extends State<AddComplaintScreen> {
     setState(() => _loading = true);
 
     try {
-      // 1️⃣ Add complaint
-      final complaintRef = await _db.collection('complaints').add({
-        'source': 'hotline',
-        'type': _typeController.text,
-        'areaId': _areaController.text,
-        'location': {
-          'lat': double.parse(_latController.text),
-          'lng': double.parse(_lngController.text),
-        },
-        'createdAt': FieldValue.serverTimestamp(),
-        'linkedIncidentId': null,
-      });
+      final lat = double.parse(_latController.text);
+      final lng = double.parse(_lngController.text);
 
-      // 2️⃣ Create incident
-      final incidentRef = await _db.collection('incidents').add({
-        'type': _typeController.text,
-        'status': 'open',
-        'severity': 'medium',
+      await _db.collection('incidents').add({
+        'type': _typeController.text.trim(),
+        'status': _status, // Pending | In Progress | Resolved
+        'severity': _severity, // low | medium | high
+        'description': _descriptionController.text.trim(),
         'location': {
-          'lat': double.parse(_latController.text),
-          'lng': double.parse(_lngController.text),
+          'lat': lat,
+          'lng': lng,
         },
-        'complaintsCount': 1,
+        'team_work': null,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      // 3️⃣ Link complaint → incident (transaction)
-      await _db.runTransaction((tx) async {
-        tx.update(complaintRef, {
-          'linkedIncidentId': incidentRef.id,
-        });
-      });
-
-      // 4️⃣ Audit log
-      await _db.collection('audit_logs').add({
-        'entityType': 'incident',
-        'entityId': incidentRef.id,
-        'action': 'incident_created_from_hotline',
-        'userId': 'system',
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Incident created successfully')),
+          const SnackBar(content: Text('✅ Incident added successfully')),
         );
         _formKey.currentState!.reset();
       }
@@ -86,51 +62,44 @@ class _AddComplaintScreenState extends State<AddComplaintScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Hotline Complaint'),
-      ),
+      appBar: AppBar(title: const Text('Add New Incident')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                controller: _typeController,
-                decoration: const InputDecoration(
-                  labelText: 'Complaint Type',
-                  hintText: 'water_cut / leak / low_pressure',
-                ),
-                validator: (v) =>
-                    v == null || v.isEmpty ? 'Required' : null,
+              _field(_typeController, 'Incident Type', 'fire / flood / accident'),
+              const SizedBox(height: 12),
+
+              _field(_descriptionController, 'Description',
+                  'Describe the incident', maxLines: 3),
+              const SizedBox(height: 12),
+
+              _dropdown(
+                label: 'Status',
+                value: _status,
+                items: const ['Pending', 'In Progress', 'Resolved'],
+                onChanged: (v) => setState(() => _status = v!),
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _areaController,
-                decoration: const InputDecoration(
-                  labelText: 'Area ID',
-                  hintText: 'nasr_city',
-                ),
-                validator: (v) =>
-                    v == null || v.isEmpty ? 'Required' : null,
+
+              _dropdown(
+                label: 'Severity',
+                value: _severity,
+                items: const ['low', 'medium', 'high'],
+                onChanged: (v) => setState(() => _severity = v!),
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _latController,
-                decoration: const InputDecoration(labelText: 'Latitude'),
-                keyboardType: TextInputType.number,
-                validator: (v) =>
-                    v == null || v.isEmpty ? 'Required' : null,
-              ),
+
+              _field(_latController, 'Latitude', '28.0871',
+                  keyboard: TextInputType.number),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _lngController,
-                decoration: const InputDecoration(labelText: 'Longitude'),
-                keyboardType: TextInputType.number,
-                validator: (v) =>
-                    v == null || v.isEmpty ? 'Required' : null,
-              ),
+
+              _field(_lngController, 'Longitude', '30.7618',
+                  keyboard: TextInputType.number),
               const SizedBox(height: 24),
+
               ElevatedButton(
                 onPressed: _loading ? null : _submit,
                 child: _loading
@@ -141,6 +110,38 @@ class _AddComplaintScreenState extends State<AddComplaintScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _field(
+    TextEditingController c,
+    String label,
+    String hint, {
+    int maxLines = 1,
+    TextInputType keyboard = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: c,
+      maxLines: maxLines,
+      keyboardType: keyboard,
+      decoration: InputDecoration(labelText: label, hintText: hint),
+      validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+    );
+  }
+
+  Widget _dropdown({
+    required String label,
+    required String value,
+    required List<String> items,
+    required void Function(String?) onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      decoration: InputDecoration(labelText: label),
+      items: items
+          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .toList(),
+      onChanged: onChanged,
     );
   }
 }
