@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
+
 import '../../controller/home_controller.dart';
 
 class IncidentsMapScreen extends GetView<DashboardController> {
@@ -26,45 +27,46 @@ class IncidentsMapScreen extends GetView<DashboardController> {
       );
     });
   }
-Widget _map() {
-  final markers = controller.incidents
-      .map<Marker?>((i) {
-        final lat = (i['lat'] as num?)?.toDouble();
-        final lng = (i['lng'] as num?)?.toDouble();
 
-        if (lat == null || lng == null) return null;
-        if (lat.isNaN || lng.isNaN) return null;
+  Widget _map() {
+    final markers = controller.incidents
+        .map<Marker?>((i) {
+          final lat = (i['location']['lat'] as num?)?.toDouble();
+          final lng = (i['location']['lng'] as num?)?.toDouble();
 
-        final severity = (i['severity'] ?? 'low').toString();
+          if (lat == null || lng == null) return null;
+          if (lat.isNaN || lng.isNaN) return null;
 
-        return Marker(
-          point: LatLng(lat, lng),
-          width: 40,
-          height: 40,
-          child: Icon(
-            Icons.location_on,
-            color: controller.getSeverityColor(severity), // 🔥 HERE
-            size: 36,
-          ),
-        );
-      })
-      .whereType<Marker>()
-      .toList();
+          final severity = (i['severity'] ?? 'low').toString();
 
-  return FlutterMap(
-    options: const MapOptions(
-      initialCenter: LatLng(28.0871, 30.7618),
-      initialZoom: 13,
-      minZoom: 3,
-      maxZoom: 18,
-    ),
-    children: [
-      TileLayer(
-        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-        userAgentPackageName: 'com.example.crisis_management',
+          return Marker(
+            point: LatLng(lat, lng),
+            width: 40,
+            height: 40,
+            child: Icon(
+              Icons.location_on,
+              color: controller.getSeverityColor(severity), // 🔥 HERE
+              size: 36,
+            ),
+          );
+        })
+        .whereType<Marker>()
+        .toList();
+
+    return FlutterMap(
+      options: const MapOptions(
+        initialCenter: LatLng(28.0871, 30.7618),
+        initialZoom: 13,
+        minZoom: 3,
+        maxZoom: 18,
       ),
-      MarkerLayer(markers: markers),
-    ],
-  );
-}
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.example.crisis_management',
+        ),
+        MarkerLayer(markers: markers),
+      ],
+    );
+  }
 }
