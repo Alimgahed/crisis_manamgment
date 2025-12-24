@@ -8,7 +8,10 @@ class DashboardController extends GetxController {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   RxInt selectedIndex = 0.obs;
-  void setSelectedIndex(int index) => selectedIndex.value = index;
+  void setSelectedIndex(int index) {
+    selectedIndex.value = index;
+    update();
+  }
 
   // ================= STATE =================
   final RxList<Map<String, dynamic>> incidents = <Map<String, dynamic>>[].obs;
