@@ -164,7 +164,7 @@ class _IncidentsMapScreenState extends State<IncidentsMapScreen> {
           mapController: mapController,
           options: MapOptions(
             initialCenter: const LatLng(28.0871, 30.7618),
-            initialZoom: 12,
+            initialZoom: 10,
             minZoom: 3,
             maxZoom: 18,
             onTap: (_, __) {
@@ -745,8 +745,8 @@ class _IncidentsMapScreenState extends State<IncidentsMapScreen> {
               borderRadius: BorderRadius.circular(8),
               child: FlutterMap(
                 options: MapOptions(
-                  initialCenter: LatLng(lat, lng),
-                  initialZoom: 15,
+                  initialCenter: LatLng(28.1500, 30.7500),
+                  initialZoom: 12,
                   interactionOptions: const InteractionOptions(
                     flags: InteractiveFlag.none,
                   ),
