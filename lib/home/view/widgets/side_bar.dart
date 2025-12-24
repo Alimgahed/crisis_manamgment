@@ -1,3 +1,4 @@
+import 'package:crisis_management/add_complaint.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -85,6 +86,11 @@ Widget buildSidebar(DashboardController controller) {
               _buildNavItem(Icons.map, 'عرض الخريطة', 1),
               _buildNavItem(Icons.people, 'الفرق', 2),
               _buildNavItem(Icons.analytics, 'التحليلات', 3),
+              _buildNavItem(Icons.add_outlined, 'إضافة أزمة', 5,
+                  onTap: () {
+                Get.to(() => const AddIncidentScreen());
+              }),
+
               _buildNavItem(Icons.settings, 'الإعدادات', 4),
             ],
           ),
@@ -178,13 +184,12 @@ Widget _buildStatCard(String label, String value, IconData icon, Color color) {
     ),
   );
 }
-
-Widget _buildNavItem(IconData icon, String label, int index) {
+Widget _buildNavItem(IconData icon, String label, int index, {VoidCallback? onTap}) {
   final DashboardController controller = Get.find<DashboardController>();
   return Obx(() {
     final bool selected = controller.selectedIndex.value == index;
     return GestureDetector(
-      onTap: () => controller.setSelectedIndex(index),
+      onTap: onTap != null ? () => onTap() : null, // only call if provided
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(

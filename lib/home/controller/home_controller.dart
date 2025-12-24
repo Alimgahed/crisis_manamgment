@@ -76,6 +76,7 @@ class DashboardController extends GetxController {
             'typeName': data['typeName'],
             'status': data['status'],
             'severity': data['severity'],
+            'address': data['address'],
             'description': data['description'],
             'location': data['location'],
             'team': data['team'],
@@ -172,6 +173,7 @@ class DashboardController extends GetxController {
         'severity': data['severity'],
         'description': data['description'],
         'location': data['location'],
+        'address': data['address'],
         'team': team,
         'createdAt': (data['createdAt'] as Timestamp?)?.toDate(),
         'updatedAt': (data['updatedAt'] as Timestamp?)?.toDate(),
@@ -296,13 +298,10 @@ class DashboardController extends GetxController {
   // ================= UI HELPERS =================
   Color getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'pending':
       case 'قيد الانتظار':
         return Colors.orange;
-      case 'in progress':
       case 'قيد التنفيذ':
         return Colors.blue;
-      case 'resolved':
       case 'تم حلها':
         return Colors.green;
       default:
@@ -312,14 +311,14 @@ class DashboardController extends GetxController {
 
   Color getSeverityColor(String severity) {
     switch (severity.toLowerCase()) {
-      case 'low':
-      case 'منخفض':
+      case 'منخفضة ':
+      case 'منخفضة':
         return Colors.green;
       case 'medium':
-      case 'متوسط':
+      case 'متوسطة':
         return Colors.orange;
       case 'high':
-      case 'عالي':
+      case 'عالية':
       case 'critical':
       case 'حرجة':
         return Colors.red;

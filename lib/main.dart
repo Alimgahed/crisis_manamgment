@@ -1,8 +1,9 @@
+import 'package:crisis_management/add_complaint.dart';
 import 'package:crisis_management/home/view/screens/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+// ignore: depend_on_referenced_packages
 import 'firebase_options.dart';
 
 void main() async {
@@ -19,15 +20,8 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      locale: const Locale('ar'),
-      supportedLocales: const [
-        Locale('ar'),
-      ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      locale: Locale('ar'),
+      fallbackLocale: Locale('ar'),
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,

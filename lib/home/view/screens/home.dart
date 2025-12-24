@@ -1,6 +1,3 @@
-// ============================================================================
-// MAIN DASHBOARD SCREEN
-// ============================================================================
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_management/home/controller/home_controller.dart';
 import 'package:crisis_management/home/view/widgets/header.dart';
@@ -8,14 +5,11 @@ import 'package:crisis_management/home/view/widgets/map_widget.dart';
 import 'package:crisis_management/home/view/widgets/side_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class CrisisDashboard extends StatelessWidget {
-  const CrisisDashboard({Key? key}) : super(key: key);
-
+  const CrisisDashboard({super.key});
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(DashboardController(), permanent: false);
-
+    Get.put(DashboardController(), permanent: false);
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
@@ -406,84 +400,189 @@ class CrisisDashboard extends StatelessWidget {
                             ],
                           ),
                         ),
-                      Builder(
-                        builder: (context) {
-                          return IconButton(
-                            onPressed: () {
-                              final incident = controller.selectedIncident.value;
-                              if (incident == null) return;
-                          
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) {
-                                  String selectedStatus = incident['status'].toString().toLowerCase();
-                                  String selectedSeverity = incident['severity'].toString().toLowerCase();
-                          
-                                  return Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text('تحديث الحادثة', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                        
-                                        const SizedBox(height: 12),
-                          
-                                        // Dropdown للحالة
-                                        DropdownButtonFormField<String>(
-                                          value: selectedStatus,
-                                          decoration: const InputDecoration(labelText: 'الحالة'),
-                                          items: const [
-                                            DropdownMenuItem(value: 'pending', child: Text('قيد الانتظار')),
-                                            DropdownMenuItem(value: 'in progress', child: Text('قيد التنفيذ')),
-                                            DropdownMenuItem(value: 'resolved', child: Text('تم حلها')),
-                                          ],
-                                          onChanged: (v) {
-                                            if (v != null) selectedStatus = v;
-                                          },
-                                        ),
-                          
-                                        const SizedBox(height: 12),
-                          
-                                        // Dropdown للشدة
-                                        DropdownButtonFormField<String>(
-                                          value: selectedSeverity,
-                                          decoration: const InputDecoration(labelText: 'شدة الحادث'),
-                                          items: const [
-                                            DropdownMenuItem(value: 'low', child: Text('منخفض')),
-                                            DropdownMenuItem(value: 'medium', child: Text('متوسط')),
-                                            DropdownMenuItem(value: 'high', child: Text('عالي')),
-                                            DropdownMenuItem(value: 'critical', child: Text('حرجة')),
-                                          ],
-                                          onChanged: (v) {
-                                            if (v != null) selectedSeverity = v;
-                                          },
-                                        ),
-                          
-                                        const SizedBox(height: 20),
-                          
-                                        ElevatedButton(
-                                          onPressed: () async {
-                                            Navigator.pop(context); // اغلق الـ BottomSheet
-                                            
-                                            // تحديث Firestore + steps
-                                            await controller.updateIncidentStatusAndSeverity(
-                                              status: selectedStatus,
-                                              severity: selectedSeverity,
-                                            );
-                                          },
-                                          child: const Text('تحديث'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            icon: const Icon(Icons.more_vert),
-                          );
-                        }
-                      )
 
+                        Builder(
+                          builder: (context) {
+                            return IconButton(
+                              // Modern Blue Icon
+                              icon: const Icon(
+                                Icons.edit_note_rounded,
+                                color: Colors.blue,
+                                size: 28,
+                              ),
+                              onPressed: () {
+                                final incident =
+                                    controller.selectedIncident.value;
+                                if (incident == null) return;
+
+                                String selectedStatus = incident['status'];
+                                   
+                                    
+                                String selectedSeverity = incident['severity'];
+                                  
+
+                                // Custom Dialog for a professional "Menu" feel
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    titlePadding: EdgeInsets.zero,
+                                    backgroundColor: Colors.white,
+                                    contentPadding: const EdgeInsets.all(20),
+                                    content: StatefulBuilder(
+                                      builder: (context, setState) {
+                                        return Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // Header Section
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons
+                                                      .settings_suggest_rounded,
+                                                  color: Colors.blue,
+                                                ),
+                                                const SizedBox(width: 10),
+                                                const Text(
+                                                  'تعديل بيانات الأزمة',
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(
+                                                      0xFF0D47A1,
+                                                    ), // Deep Blue
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const Divider(
+                                              height: 30,
+                                              thickness: 1,
+                                            ),
+
+                                            // Status Dropdown
+                                            _buildLabel("حالة الأزمة"),
+                                            _buildDropdown(
+                                              value: selectedStatus,
+                                              icon:
+                                                  Icons.hourglass_empty_rounded,
+                                              items: const [
+                                                DropdownMenuItem(
+                                                  value: 'قيد الانتظار',
+                                                  child: Text('قيد الانتظار'),
+                                                ),
+                                                DropdownMenuItem(
+                                                  value: 'قيد التنفيذ',
+                                                  child: Text('قيد التنفيذ'),
+                                                ),
+                                                DropdownMenuItem(
+                                                  value: 'تم حلها',
+                                                  child: Text('تم حلها'),
+                                                ),
+                                              ],
+                                              onChanged: (v) => setState(
+                                                () => selectedStatus = v!,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+
+                                            // Severity Dropdown
+                                            _buildLabel("شدة الأزمة"),
+                                            _buildDropdown(
+                                              value: selectedSeverity,
+                                              icon: Icons.speed_rounded,
+                                              items: const [
+                                                DropdownMenuItem(
+                                                  value: 'منخفضة',
+                                                  child: Text('منخفضة'),
+                                                ),
+                                                DropdownMenuItem(
+                                                  value: 'متوسطة',
+                                                  child: Text('متوسطة'),
+                                                ),
+                                                DropdownMenuItem(
+                                                  value: 'عالية',
+                                                  child: Text('عالية'),
+                                                ),
+                                                DropdownMenuItem(
+                                                  value: 'حرجة',
+                                                  child: Text('حرجة'),
+                                                ),
+                                              ],
+                                              onChanged: (v) => setState(
+                                                () => selectedSeverity = v!,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 24),
+
+                                            // Action Buttons
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(context),
+                                                    child: const Text(
+                                                      'إلغاء',
+                                                      style: TextStyle(
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  flex: 2,
+                                                  child: ElevatedButton(
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor:
+                                                          Colors.blue[700],
+                                                      foregroundColor:
+                                                          Colors.white,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              12,
+                                                            ),
+                                                      ),
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            vertical: 12,
+                                                          ),
+                                                    ),
+                                                    onPressed: () async {
+                                                      Navigator.pop(context);
+                                                      await controller
+                                                          .updateIncidentStatusAndSeverity(
+                                                            status:
+                                                                selectedStatus,
+                                                            severity:
+                                                                selectedSeverity,
+                                                          );
+                                                    },
+                                                    child: const Text(
+                                                      'تحديث الأزمة',
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+
+                        // Helper for labels
                       ],
                     ),
                     if (incident['createdAt'] != null) ...[
@@ -539,7 +638,8 @@ class CrisisDashboard extends StatelessWidget {
 
               // الموقع
               if (incident['location'] != null)
-                _buildLocationCard(incident['location']),
+                _buildLocationCard(incident['location'],
+                    incident['address']),
 
               const SizedBox(height: 16),
 
@@ -601,7 +701,7 @@ class CrisisDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationCard(Map<String, dynamic> location) {
+  Widget _buildLocationCard(Map<String, dynamic> location, String?address) {
     final lat = location['lat'];
     final lng = location['lng'];
 
@@ -621,8 +721,8 @@ class CrisisDashboard extends StatelessWidget {
             children: [
               const Icon(Icons.location_on, color: Color(0xFF2C5F8D), size: 24),
               const SizedBox(width: 12),
-              const Text(
-                'الموقع',
+              Text(
+                address??"",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -801,7 +901,7 @@ class CrisisDashboard extends StatelessWidget {
                     value: isCompleted,
                     activeColor: Colors.green,
                     onChanged: (val) async {
-                      final newStatus = val! ? 'done' : 'pending';
+                      final newStatus = val! ? true : false;
                       step['status'] = newStatus;
                       await FirebaseFirestore.instance
                           .collection('incident_steps')
@@ -1105,4 +1205,48 @@ class CrisisDashboard extends StatelessWidget {
       return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
     }
   }
+}
+
+// 1. Professional Label Helper
+Widget _buildLabel(String text) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 6.0),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+        color: Colors.blueGrey,
+      ),
+    ),
+  );
+}
+
+// 2. Custom Blue Dropdown Style
+Widget _buildDropdown({
+  required String value,
+  required IconData icon,
+  required List<DropdownMenuItem<String>> items,
+  required ValueChanged<String?> onChanged,
+}) {
+  return DropdownButtonFormField<String>(
+    value: value,
+    icon: const Icon(Icons.arrow_drop_down_circle_outlined, color: Colors.blue),
+    decoration: InputDecoration(
+      prefixIcon: Icon(icon, color: Colors.blue[300], size: 20),
+      filled: true,
+      fillColor: Colors.blue[50]?.withOpacity(0.5),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.blue[100]!),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+      ),
+    ),
+    items: items,
+    onChanged: onChanged,
+  );
 }
