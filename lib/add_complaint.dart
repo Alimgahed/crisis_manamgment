@@ -748,3 +748,209 @@ class _AddIncidentScreenState extends State<AddIncidentScreen> {
     return Icon(icon, color: color, size: 20);
   }
 }
+
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:flutter/material.dart';
+
+// class FirestoreSeedScreen extends StatelessWidget {
+//   const FirestoreSeedScreen({super.key});
+
+//   static final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+//   /// MAIN SEED
+//   Future<void> _seedAll(BuildContext context) async {
+//     try {
+//       // 1️⃣ Seed Templates
+//       await _seedIncidentTypes();
+//       await _seedTeams();
+
+//       // 2️⃣ Seed Current Incidents (Empty for now)
+//       await _createCurrentIncidents();
+
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('✅ تم تعبئة Firestore بنجاح')),
+//       );
+//     } catch (e) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('❌ خطأ: $e')),
+//       );
+//     }
+//   }
+
+//   // ================= INCIDENT TYPES =================
+//   static Future<void> _seedIncidentTypes() async {
+//     final col = _db.collection('incident_types');
+
+//     await col.doc('pipe_break').set({
+//       'name': 'كسر ماسورة',
+//       'defaultSeverity': 'حرجة',
+//       'steps': [
+//         {'id': 's1', 'title': 'إغلاق الصمام الرئيسي', 'order': 1},
+//         {'id': 's2', 'title': 'تأمين المنطقة', 'order': 2},
+//         {'id': 's3', 'title': 'إصلاح الماسورة', 'order': 3},
+//         {'id': 's4', 'title': 'إعادة المياه', 'order': 4},
+//       ],
+//       'createdAt': FieldValue.serverTimestamp(),
+//     });
+
+//     await col.doc('water_cut').set({
+//       'name': 'انقطاع المياه',
+//       'defaultSeverity': 'متوسطة',
+//       'steps': [
+//         {'id': 's1', 'title': 'فحص المصدر', 'order': 1},
+//         {'id': 's2', 'title': 'إرسال فريق الصيانة', 'order': 2},
+//         {'id': 's3', 'title': 'استعادة الخدمة', 'order': 3},
+//       ],
+//       'createdAt': FieldValue.serverTimestamp(),
+//     });
+
+//     await col.doc('clog_network').set({
+//       'name': 'انسداد الشبكة',
+//       'defaultSeverity': 'متوسطة',
+//       'steps': [
+//         {'id': 's1', 'title': 'تحديد موقع الانسداد', 'order': 1},
+//         {'id': 's2', 'title': 'إرسال فريق التسليك', 'order': 2},
+//         {'id': 's3', 'title': 'تنظيف وإعادة التشغيل', 'order': 3},
+//       ],
+//       'createdAt': FieldValue.serverTimestamp(),
+//     });
+
+//     await col.doc('water_pollution').set({
+//       'name': 'تلوث المياه',
+//       'defaultSeverity': 'حرجة',
+//       'steps': [
+//         {'id': 's1', 'title': 'إيقاف التوزيع', 'order': 1},
+//         {'id': 's2', 'title': 'فحص المصدر', 'order': 2},
+//         {'id': 's3', 'title': 'معالجة المياه', 'order': 3},
+//         {'id': 's4', 'title': 'إعادة التوزيع', 'order': 4},
+//       ],
+//       'createdAt': FieldValue.serverTimestamp(),
+//     });
+//   }
+
+//   // ================= TEAMS =================
+//   static Future<void> _seedTeams() async {
+//     final col = _db.collection('teams');
+
+//     await col.doc('team_minya_1').set({
+//       'name': 'فريق الصيانة 1',
+//       'branch': 'المنيا المركز',
+//       'isAvailable': true,
+//       'location': {'lat': 28.091, 'lng': 30.757},
+//       'createdAt': FieldValue.serverTimestamp(),
+//     });
+
+//     await col.doc('team_minya_2').set({
+//       'name': 'فريق الطوارئ 2',
+//       'branch': 'المنيا الجديدة',
+//       'isAvailable': true,
+//       'location': {'lat': 28.109, 'lng': 30.751},
+//       'createdAt': FieldValue.serverTimestamp(),
+//     });
+
+//     await col.doc('team_minya_3').set({
+//       'name': 'فريق التسليك 3',
+//       'branch': 'سمالوط',
+//       'isAvailable': true,
+//       'location': {'lat': 28.204, 'lng': 30.765},
+//       'createdAt': FieldValue.serverTimestamp(),
+//     });
+
+//     await col.doc('team_minya_4').set({
+//       'name': 'فريق الجودة 4',
+//       'branch': 'مغاغة',
+//       'isAvailable': true,
+//       'location': {'lat': 28.263, 'lng': 30.753},
+//       'createdAt': FieldValue.serverTimestamp(),
+//     });
+//   }
+
+//   // ================= CURRENT INCIDENTS =================
+//   static Future<void> _createCurrentIncidents() async {
+//     final incidentsCol = _db.collection('incidents');
+
+//     final exampleIncidents = [
+//       {
+//         'typeId': 'pipe_break',
+//         'typeName': 'كسر ماسورة',
+//         'status': 'قيد التنفيذ',
+//         'severity': 'حرجة',
+//         'description': 'كسر ماسورة رئيسية في شارع 1',
+//         'teamId': 'team_minya_1',
+//       },
+//       {
+//         'typeId': 'water_cut',
+//         'typeName': 'انقطاع المياه',
+//         'status': 'قيد الانتظار',
+//         'severity': 'متوسطة',
+//         'description': 'انقطاع مياه في شارع 2',
+//         'teamId': 'team_minya_2',
+//       },
+//       {
+//         'typeId': 'clog_network',
+//         'typeName': 'انسداد الشبكة',
+//         'status': 'قيد التنفيذ',
+//         'severity': 'متوسطة',
+//         'description': 'انسداد في شبكة الصرف الصحي',
+//         'teamId': 'team_minya_3',
+//       },
+//       {
+//         'typeId': 'water_pollution',
+//         'typeName': 'تلوث المياه',
+//         'status': 'قيد التنفيذ',
+//         'severity': 'حرجة',
+//         'description': 'تلوث مياه في حي مغاغة',
+//         'teamId': 'team_minya_4',
+//       },
+//     ];
+
+//     final teamsCol = _db.collection('teams');
+//     final stepsCol = _db.collection('incident_steps');
+
+//     for (var incident in exampleIncidents) {
+//       final teamDoc = await teamsCol.doc(incident['teamId']).get();
+//       final incidentRef = await incidentsCol.add({
+//         'typeId': incident['typeId'],
+//         'typeName': incident['typeName'],
+//         'status': incident['status'],
+//         'severity': incident['severity'],
+//         'description': incident['description'],
+//         'location': teamDoc.data()?['location'] ?? {'lat': 28.091, 'lng': 30.757},
+//         'team': teamDoc.data(),
+//         'createdAt': FieldValue.serverTimestamp(),
+//         'updatedAt': FieldValue.serverTimestamp(),
+//       });
+
+//       // Copy steps from template
+//       final template = await _db.collection('incident_types').doc(incident['typeId']).get();
+//       final steps = (template.data()?['steps'] as List<dynamic>? ?? []);
+
+//       for (var step in steps) {
+//         await stepsCol.add({
+//           'incidentId': incidentRef.id,
+//           'stepId': step['id'],
+//           'title': step['title'],
+//           'order': step['order'],
+//           'status': 'pending',
+//           'updatedAt': FieldValue.serverTimestamp(),
+//         });
+//       }
+//     }
+//   }
+
+//   // ================= UI =================
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('تعبئة Firestore (الحوادث)')),
+//       body: Center(
+//         child: ElevatedButton.icon(
+//           icon: const Icon(Icons.cloud_upload),
+//           label: const Text('تعبئة Firestore بالحوادث'),
+//           onPressed: () => _seedAll(context),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
