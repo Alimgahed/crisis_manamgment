@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crisis_management/home/controller/home_controller.dart';
+import 'package:crisis_management/home/view/widgets/analysis.dart';
 import 'package:crisis_management/home/view/widgets/header.dart';
 import 'package:crisis_management/home/view/widgets/map_widget.dart';
 import 'package:crisis_management/home/view/widgets/side_bar.dart';
@@ -27,7 +28,7 @@ class CrisisDashboard extends StatelessWidget {
                     case 2:
                       return _buildTeamsView(controller);
                     case 3:
-                      return _buildAnalyticsView(controller);
+                      return Expanded(child: WaterCompanyAnalyticsDashboard());
                     case 4:
                       return _buildSettingsView();
                     default:
@@ -1116,28 +1117,76 @@ class CrisisDashboard extends StatelessWidget {
   }
 
   // Analytics View
-  Widget _buildAnalyticsView(DashboardController controller) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.analytics, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text(
-                'Analytics View',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('Coming Soon', style: TextStyle(color: Colors.grey)),
-            ],
+
+Widget _title(String text) {
+  return Text(
+    text,
+    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  );
+}
+
+Widget _kpi(String title, int value, IconData icon, Color color) {
+  return Container(
+    width: 220,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      boxShadow: const [
+        BoxShadow(color: Colors.black12, blurRadius: 6),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(height: 12),
+        Text(
+          value.toString(),
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: color,
           ),
         ),
-      ),
-    );
-  }
+        const SizedBox(height: 6),
+        Text(title, style: const TextStyle(color: Colors.grey)),
+      ],
+    ),
+  );
+}
+
+Widget _row(String label, int value, Color color) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      children: [
+        Expanded(child: Text(label)),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            value.toString(),
+            style: TextStyle(
+              color: color,
+
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+
+
+
+
 
   // Settings View
   Widget _buildSettingsView() {

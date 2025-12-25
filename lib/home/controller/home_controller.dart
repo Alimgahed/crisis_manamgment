@@ -39,7 +39,7 @@ class DashboardController extends GetxController {
   StreamSubscription<QuerySnapshot>? _stepsSub;
   StreamSubscription<DocumentSnapshot>? _selectedIncidentSub;
 
-  bool _teamReleased = false;
+  bool _teamReleased = false; // تم الحفاظ عليه بناءً على طلبك
   bool _isFirstLoad = true;
 
   // ================= SOUND URLS =================
@@ -86,7 +86,6 @@ class DashboardController extends GetxController {
     if (!html.Notification.supported) return;
     if (html.Notification.permission != 'granted') return;
 
-    // Web notification
     final notification = html.Notification(
       title,
       body: body,
@@ -95,7 +94,6 @@ class DashboardController extends GetxController {
     );
     Timer(const Duration(seconds: 6), () => notification.close());
 
-    // Play sound
     final audio = html.AudioElement()
       ..src = soundUrl ?? defaultSound
       ..autoplay = true;
@@ -119,7 +117,6 @@ class DashboardController extends GetxController {
 
   // ================= MAIN STREAMS =================
   void _setupStreams() {
-    // 🔹 الحوادث
     incidentsSub = _db.collection('incidents').snapshots().listen(
       (snapshot) {
         final loaded = snapshot.docs.map((doc) {
@@ -139,54 +136,26 @@ class DashboardController extends GetxController {
           };
         }).toList();
 
-        // Notification Logic
         for (final incident in loaded) {
           final id = incident['id'];
           final old = _incidentCache[id];
 
           if (old == null && !_isFirstLoad) {
-            // 🆕 حادثة جديدة
-            _showNotification(
-              '🚨 حادثة جديدة',
-              incident['typeName'] ?? 'حادثة',
-              incident['severity'] ?? 'low',
-            );
+            _showNotification('🚨 حادثة جديدة', incident['typeName'] ?? 'حادثة', incident['severity'] ?? 'low');
           }
 
           if (old != null && old['status'] != incident['status']) {
-            // حالة تم حلها → صوت خاص
             if (incident['status'] == 'تم حلها') {
-              _showNotification(
-                '✅ حادثة تم حلها',
-                'الحالة: تم حلها',
-                incident['severity'] ?? 'low',
-                soundUrl: resolvedSound,
-              );
+              _showNotification('✅ حادثة تم حلها', 'الحالة: تم حلها', incident['severity'] ?? 'low', soundUrl: resolvedSound);
             } else {
-              // تحديث حالة عادية
-              _showNotification(
-                '🔄 تحديث حالة حادثة',
-                'الحالة: ${incident['status']}',
-                incident['severity'] ?? 'low',
-              );
+              _showNotification('🔄 تحديث حالة حادثة', 'الحالة: ${incident['status']}', incident['severity'] ?? 'low');
             }
           }
-
-          if (old != null && old['severity'] != incident['severity']) {
-            // تغيير خطورة
-            _showNotification(
-              '⚠️ تغيير درجة الخطورة',
-              'الخطورة: ${incident['severity']}',
-              incident['severity'],
-            );
-          }
-
           _incidentCache[id] = Map<String, dynamic>.from(incident);
         }
 
         incidents.assignAll(loaded);
         _calculateStats();
-
         if (_isFirstLoad) _isFirstLoad = false;
         isLoading.value = false;
       },
@@ -196,51 +165,16 @@ class DashboardController extends GetxController {
       },
     );
 
-    // 🔹 أنواع الحوادث
     _incidentTypesSub = _db.collection('incident_types').snapshots().listen((snapshot) {
-      incidentTypes.assignAll(
-        snapshot.docs.map((doc) {
-          final data = doc.data();
-          return {
-            'id': doc.id,
-            'name': data['name'],
-            'defaultSeverity': data['defaultSeverity'],
-            'steps': data['steps'] ?? [],
-          };
-        }).toList(),
-      );
+      incidentTypes.assignAll(snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList());
     });
 
-    // 🔹 الفرق
     _teamsSub = _db.collection('teams').snapshots().listen((snapshot) {
-      teams.assignAll(
-        snapshot.docs.map((doc) {
-          final data = doc.data();
-          return {
-            'id': doc.id,
-            'name': data['name'],
-            'branch': data['branch'],
-            'isAvailable': data['isAvailable'] ?? true,
-            'location': data['location'],
-          };
-        }).toList(),
-      );
+      teams.assignAll(snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList());
     });
 
-    // 🔹 كل الخطوات
     _stepsSub = _db.collection('incident_steps').snapshots().listen((snapshot) {
-      steps.assignAll(
-        snapshot.docs.map((doc) {
-          final data = doc.data();
-          return {
-            'id': doc.id,
-            'incidentId': data['incidentId'],
-            'title': data['title'],
-            'order': data['order'],
-            'status': data['status'],
-          };
-        }).toList(),
-      );
+      steps.assignAll(snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList());
     });
   }
 
@@ -252,7 +186,7 @@ class DashboardController extends GetxController {
       if (!doc.exists) return;
 
       final data = doc.data()!;
-      final status = data['status'];
+      final status = data['status']?.toString() ?? '';
       final team = data['team'];
 
       selectedIncident.value = {
@@ -269,28 +203,42 @@ class DashboardController extends GetxController {
         'updatedAt': (data['updatedAt'] as Timestamp?)?.toDate(),
       };
 
+      // تحرير الفريق فقط إذا أصبحت الحالة "تم حلها" ولم يسبق تحريره لهذه الجلسة
       if ((status.toLowerCase() == 'resolved' || status == 'تم حلها') && !_teamReleased) {
-        _teamReleased = true;
         await _releaseTeamFromIncident(team);
       }
     });
   }
 
-  // ================= TEAM RELEASE =================
+  // ================= MODIFIED TEAM RELEASE LOGIC =================
   Future<void> _releaseTeamFromIncident(Map<String, dynamic>? team) async {
     if (team == null) return;
-
     final String? teamId = team['id'];
     if (teamId == null) return;
 
     final teamRef = _db.collection('teams').doc(teamId);
-    final snap = await teamRef.get();
 
-    if (!snap.exists) return;
+    // 1. جلب كافة الحوادث المسندة لهذا الفريق
+    final teamIncidents = await _db
+        .collection('incidents')
+        .where('team.id', isEqualTo: teamId)
+        .get();
 
-    final isAvailable = snap['isAvailable'] ?? true;
-    if (!isAvailable) {
-      await teamRef.update({'isAvailable': true});
+    // 2. التحقق: هل توجد أي حادثة حالتها ليست "تم حلها"؟
+    final hasActiveTasks = teamIncidents.docs.any((doc) {
+      final s = doc.data()['status']?.toString().toLowerCase();
+      return s != 'تم حلها' && s != 'resolved';
+    });
+
+    // 3. التحديث فقط إذا كانت جميع الحوادث "تم حلها"
+    if (!hasActiveTasks) {
+      await teamRef.update({
+        'isAvailable': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      _teamReleased = true; // تم التنفيذ بنجاح
+    } else {
+      _teamReleased = false; // لا يزال لديه مهام أخرى
     }
   }
 
@@ -300,12 +248,11 @@ class DashboardController extends GetxController {
     if (incident == null) return;
 
     final incidentId = incident['id'];
-
     final incidentRef = _db.collection('incidents').doc(incidentId);
 
     await incidentRef.update({
-      'status': status.toLowerCase(),
-      'severity': severity.toLowerCase(),
+      'status': status,
+      'severity': severity,
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
@@ -353,51 +300,29 @@ class DashboardController extends GetxController {
   // ================= UI HELPERS =================
   Color getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'قيد الانتظار':
-        return Colors.orange;
-      case 'قيد التنفيذ':
-        return Colors.blue;
-      case 'تم حلها':
-        return Colors.green;
-      default:
-        return Colors.grey;
+      case 'قيد الانتظار': return Colors.orange;
+      case 'قيد التنفيذ': return Colors.blue;
+      case 'تم حلها': return Colors.green;
+      default: return Colors.grey;
     }
   }
 
   Color getSeverityColor(String severity) {
     switch (severity.toLowerCase()) {
-      case 'منخفضة':
-        return Colors.green;
-      case 'medium':
-      case 'متوسطة':
-        return Colors.orange;
-      case 'high':
+      case 'منخفضة': return Colors.green;
+      case 'متوسطة': return Colors.orange;
       case 'عالية':
-      case 'critical':
-      case 'حرجة':
-        return Colors.red;
-      default:
-        return Colors.grey;
+      case 'حرجة': return Colors.red;
+      default: return Colors.grey;
     }
   }
 
   IconData getIncidentIcon(String type) {
     switch (type.toLowerCase()) {
-      case 'fire':
-      case 'حريق':
-        return Icons.local_fire_department;
-      case 'flood':
-      case 'فيضان':
-        return Icons.water;
-      case 'accident':
-      case 'حادث':
-        return Icons.car_crash;
-      case 'medical':
-      case 'طبي':
-      case 'طبية':
-        return Icons.medical_services;
-      default:
-        return Icons.location_on;
+      case 'حريق': return Icons.local_fire_department;
+      case 'حادث': return Icons.car_crash;
+      case 'طبية': return Icons.medical_services;
+      default: return Icons.location_on;
     }
   }
 
