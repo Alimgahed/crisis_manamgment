@@ -6,6 +6,7 @@ import 'package:crisis_management/home/view/widgets/map_widget.dart';
 import 'package:crisis_management/home/view/widgets/side_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 class CrisisDashboard extends StatelessWidget {
   const CrisisDashboard({super.key});
   @override
@@ -417,10 +418,8 @@ class CrisisDashboard extends StatelessWidget {
                                 if (incident == null) return;
 
                                 String selectedStatus = incident['status'];
-                                   
-                                    
+
                                 String selectedSeverity = incident['severity'];
-                                  
 
                                 // Custom Dialog for a professional "Menu" feel
                                 showDialog(
@@ -639,8 +638,7 @@ class CrisisDashboard extends StatelessWidget {
 
               // الموقع
               if (incident['location'] != null)
-                _buildLocationCard(incident['location'],
-                    incident['address']),
+                _buildLocationCard(incident['location'], incident['address']),
 
               const SizedBox(height: 16),
 
@@ -702,7 +700,7 @@ class CrisisDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationCard(Map<String, dynamic> location, String?address) {
+  Widget _buildLocationCard(Map<String, dynamic> location, String? address) {
     final lat = location['lat'];
     final lng = location['lng'];
 
@@ -723,7 +721,7 @@ class CrisisDashboard extends StatelessWidget {
               const Icon(Icons.location_on, color: Color(0xFF2C5F8D), size: 24),
               const SizedBox(width: 12),
               Text(
-                address??"",
+                address ?? "",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -1024,7 +1022,7 @@ class CrisisDashboard extends StatelessWidget {
                   crossAxisCount: 3,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.5,
+                  childAspectRatio: 3,
                 ),
                 itemCount: controller.teams.length,
                 itemBuilder: (context, index) {
@@ -1118,75 +1116,63 @@ class CrisisDashboard extends StatelessWidget {
 
   // Analytics View
 
-Widget _title(String text) {
-  return Text(
-    text,
-    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-  );
-}
+  Widget _title(String text) {
+    return Text(
+      text,
+      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    );
+  }
 
-Widget _kpi(String title, int value, IconData icon, Color color) {
-  return Container(
-    width: 220,
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      boxShadow: const [
-        BoxShadow(color: Colors.black12, blurRadius: 6),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: color),
-        const SizedBox(height: 12),
-        Text(
-          value.toString(),
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(title, style: const TextStyle(color: Colors.grey)),
-      ],
-    ),
-  );
-}
-
-Widget _row(String label, int value, Color color) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(
-      children: [
-        Expanded(child: Text(label)),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
+  Widget _kpi(String title, int value, IconData icon, Color color) {
+    return Container(
+      width: 220,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color),
+          const SizedBox(height: 12),
+          Text(
             value.toString(),
             style: TextStyle(
-              color: color,
-
+              fontSize: 28,
               fontWeight: FontWeight.bold,
+              color: color,
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+          const SizedBox(height: 6),
+          Text(title, style: const TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
+  }
 
-
-
-
-
-
+  Widget _row(String label, int value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              value.toString(),
+              style: TextStyle(color: color, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   // Settings View
   Widget _buildSettingsView() {

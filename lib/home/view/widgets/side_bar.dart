@@ -3,8 +3,11 @@
 // ============================================================================
 
 import 'package:crisis_management/add_complaint.dart';
+import 'package:crisis_management/add_team.dart';
+import 'package:crisis_management/add_type.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controller/home_controller.dart';
 
 Widget buildSidebar(DashboardController controller) {
@@ -17,11 +20,7 @@ Widget buildSidebar(DashboardController controller) {
         colors: [Color(0xFF1E3A5F), Color(0xFF2C5F8D)],
       ),
       boxShadow: [
-        BoxShadow(
-          color: Colors.black26,
-          blurRadius: 10,
-          offset: Offset(2, 0),
-        ),
+        BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(2, 0)),
       ],
     ),
     child: Column(
@@ -76,30 +75,32 @@ Widget _buildHeader() {
 Widget _buildStatCards(DashboardController controller) {
   return Padding(
     padding: const EdgeInsets.all(16),
-    child: Obx(() => Column(
-      children: [
-        _buildStatCard(
-          'نشطة',
-          controller.activeIncidents.value.toString(),
-          Icons.warning_amber_rounded,
-          Colors.orange,
-        ),
-        const SizedBox(height: 12),
-        _buildStatCard(
-          'حرجة',
-          controller.criticalIncidents.value.toString(),
-          Icons.error_outline,
-          Colors.red,
-        ),
-        const SizedBox(height: 12),
-        _buildStatCard(
-          'تم حلها اليوم',
-          controller.resolvedToday.value.toString(),
-          Icons.check_circle_outline,
-          Colors.green,
-        ),
-      ],
-    )),
+    child: Obx(
+      () => Column(
+        children: [
+          _buildStatCard(
+            'نشطة',
+            controller.activeIncidents.value.toString(),
+            Icons.warning_amber_rounded,
+            Colors.orange,
+          ),
+          const SizedBox(height: 12),
+          _buildStatCard(
+            'حرجة',
+            controller.criticalIncidents.value.toString(),
+            Icons.error_outline,
+            Colors.red,
+          ),
+          const SizedBox(height: 12),
+          _buildStatCard(
+            'تم حلها اليوم',
+            controller.resolvedToday.value.toString(),
+            Icons.check_circle_outline,
+            Colors.green,
+          ),
+        ],
+      ),
+    ),
   );
 }
 
@@ -192,6 +193,33 @@ Widget _buildNavigation(DashboardController controller) {
       ),
       _buildNavItem(
         controller: controller,
+        icon: Icons.group_add,
+        label: 'إضافة فريق',
+        index: 6,
+        customAction: () {
+          Get.to(() => const AddTeamScreen());
+        },
+      ),
+      _buildNavItem(
+        controller: controller,
+        icon: Icons.group_add,
+        label: 'إضافة فريق',
+        index: 6,
+        customAction: () {
+          Get.to(() => const AddTeamScreen());
+        },
+      ),
+      _buildNavItem(
+        controller: controller,
+        icon: Icons.category,
+        label: 'إضافة  نوع ازمة',
+        index: 6,
+        customAction: () {
+          Get.to(() => const AddIncidentTypeScreen());
+        },
+      ),
+      _buildNavItem(
+        controller: controller,
         icon: Icons.settings,
         label: 'الإعدادات',
         index: 4,
@@ -228,11 +256,11 @@ Widget _buildNavItem({
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? Colors.white.withOpacity(0.15) 
+          color: isSelected
+              ? Colors.white.withOpacity(0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: isSelected 
+          border: isSelected
               ? Border.all(color: Colors.white.withOpacity(0.3))
               : null,
         ),
@@ -240,9 +268,7 @@ Widget _buildNavItem({
           children: [
             Icon(
               icon,
-              color: isSelected 
-                  ? Colors.white 
-                  : Colors.white.withOpacity(0.7),
+              color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
               size: 22,
             ),
             const SizedBox(width: 12),
@@ -250,12 +276,10 @@ Widget _buildNavItem({
               child: Text(
                 label,
                 style: TextStyle(
-                  color: isSelected 
-                      ? Colors.white 
+                  color: isSelected
+                      ? Colors.white
                       : Colors.white.withOpacity(0.7),
-                  fontWeight: isSelected 
-                      ? FontWeight.w600 
-                      : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   fontSize: 14,
                 ),
               ),
@@ -284,9 +308,7 @@ Widget _buildUserProfile() {
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: Colors.white.withOpacity(0.1),
-      border: Border(
-        top: BorderSide(color: Colors.white.withOpacity(0.2)),
-      ),
+      border: Border(top: BorderSide(color: Colors.white.withOpacity(0.2))),
     ),
     child: Row(
       children: [
@@ -309,19 +331,13 @@ Widget _buildUserProfile() {
               ),
               Text(
                 'مشرف',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
           ),
         ),
         PopupMenuButton<String>(
-          icon: Icon(
-            Icons.more_vert,
-            color: Colors.white.withOpacity(0.7),
-          ),
+          icon: Icon(Icons.more_vert, color: Colors.white.withOpacity(0.7)),
           color: const Color(0xFF2C5F8D),
           itemBuilder: (context) => [
             const PopupMenuItem(
@@ -330,10 +346,7 @@ Widget _buildUserProfile() {
                 children: [
                   Icon(Icons.person, color: Colors.white, size: 18),
                   SizedBox(width: 8),
-                  Text(
-                    'الملف الشخصي',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  Text('الملف الشخصي', style: TextStyle(color: Colors.white)),
                 ],
               ),
             ),
@@ -343,10 +356,7 @@ Widget _buildUserProfile() {
                 children: [
                   Icon(Icons.settings, color: Colors.white, size: 18),
                   SizedBox(width: 8),
-                  Text(
-                    'الإعدادات',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  Text('الإعدادات', style: TextStyle(color: Colors.white)),
                 ],
               ),
             ),
@@ -356,10 +366,7 @@ Widget _buildUserProfile() {
                 children: [
                   Icon(Icons.logout, color: Colors.red, size: 18),
                   SizedBox(width: 8),
-                  Text(
-                    'تسجيل الخروج',
-                    style: TextStyle(color: Colors.red),
-                  ),
+                  Text('تسجيل الخروج', style: TextStyle(color: Colors.red)),
                 ],
               ),
             ),
@@ -450,11 +457,11 @@ class EnhancedNavItem extends StatelessWidget {
         curve: Curves.easeInOut,
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? Colors.white.withOpacity(0.15) 
+          color: isSelected
+              ? Colors.white.withOpacity(0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: isSelected 
+          border: isSelected
               ? Border.all(color: Colors.white.withOpacity(0.3))
               : null,
         ),
@@ -477,8 +484,8 @@ class EnhancedNavItem extends StatelessWidget {
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
                       icon,
-                      color: isSelected 
-                          ? Colors.white 
+                      color: isSelected
+                          ? Colors.white
                           : Colors.white.withOpacity(0.7),
                       size: isSelected ? 24 : 22,
                     ),
@@ -488,11 +495,11 @@ class EnhancedNavItem extends StatelessWidget {
                     child: Text(
                       label,
                       style: TextStyle(
-                        color: isSelected 
-                            ? Colors.white 
+                        color: isSelected
+                            ? Colors.white
                             : Colors.white.withOpacity(0.7),
-                        fontWeight: isSelected 
-                            ? FontWeight.w600 
+                        fontWeight: isSelected
+                            ? FontWeight.w600
                             : FontWeight.normal,
                         fontSize: 14,
                       ),
@@ -519,4 +526,3 @@ class EnhancedNavItem extends StatelessWidget {
     });
   }
 }
-     
