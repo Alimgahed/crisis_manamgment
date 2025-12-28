@@ -24,7 +24,6 @@ class _AddIncidentScreenState extends State<AddIncidentScreen> {
   String? _selectedTypeId;
   String? _selectedTypeName;
   String? _selectedSeverity = 'متوسطة';
-  bool _loading = false;
 
   // Default Location (Minya, Egypt)
   LatLng _selectedLocation = const LatLng(28.1091, 30.7503);
@@ -57,11 +56,9 @@ class _AddIncidentScreenState extends State<AddIncidentScreen> {
   }
 
   Future<void> _loadInitialData() async {
-    setState(() => _loading = true);
     await _loadIncidentTypes();
     await _loadTeams();
     await _getCurrentLocation();
-    setState(() => _loading = false);
   }
 
   Future<void> _getCurrentLocation() async {
@@ -170,7 +167,6 @@ class _AddIncidentScreenState extends State<AddIncidentScreen> {
       return;
     }
 
-    setState(() => _loading = true);
     try {
       final nearestTeam = _findNearestTeam();
 
@@ -246,7 +242,6 @@ class _AddIncidentScreenState extends State<AddIncidentScreen> {
         icon: const Icon(Icons.error_outline, color: Colors.white),
       );
     } finally {
-      setState(() => _loading = false);
     }
   }
 
@@ -259,7 +254,7 @@ class _AddIncidentScreenState extends State<AddIncidentScreen> {
       child: Scaffold(
         backgroundColor: surfaceColor,
         appBar: _buildAppBar(),
-        body: _loading && _incidentTypes.isEmpty
+        body:  _incidentTypes.isEmpty
             ? _buildLoadingScreen()
             : Center(
                 child: Container(
@@ -668,17 +663,9 @@ class _AddIncidentScreenState extends State<AddIncidentScreen> {
           elevation: 0,
           shadowColor: primaryColor.withOpacity(0.3),
         ),
-        onPressed: _loading ? null : _submitIncident,
-        child: _loading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2.5,
-                ),
-              )
-            : Row(
+        onPressed:  _submitIncident,
+        child: 
+             Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   SizedBox(width: 12),

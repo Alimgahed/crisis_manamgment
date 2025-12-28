@@ -275,7 +275,7 @@ class _IncidentsMapScreenState extends State<IncidentsMapScreen> {
             child: Icon(
               Icons.location_on,
               size: 32,
-              color: isResolved ? Colors.grey : color,
+              color: isResolved ? Colors.green : color,
             ),
           ),
         ),
